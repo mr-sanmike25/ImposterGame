@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     [SerializeField] protected Rigidbody rb;
     [SerializeField] TextMeshPro m_nickname;
+    [SerializeField] protected Animator m_myAnim;
     PhotonView m_PV;
 
     #endregion
@@ -29,6 +30,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] protected float playerInputHorizontal;
     [SerializeField] protected float playerInputForward;
     SpriteRenderer m_spriteRenderer;
+    Vector3 m_moveDirection;
+    Quaternion m_rotation;
 
     #endregion
 
@@ -39,6 +42,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
         m_PV = GetComponent<PhotonView>();
         m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
         gameObject.name = m_PV.Owner.NickName;
+        m_myAnim.SetBool("IsMoving", false);
+        m_myAnim.SetBool("IsIdle", true);
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
     }
 
@@ -46,9 +51,28 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if (m_PV.IsMine)
         {
-            playerInputHorizontal = Input.GetAxis("Horizontal");
-            playerInputForward = Input.GetAxis("Vertical");
-            rb.velocity = new Vector3(playerInputHorizontal, 0.0f, playerInputForward) * (playerSpeed) /** Time.fixedDeltaTime*/;
+            playerInputHorizontal = Input.GetAxisRaw("Horizontal");
+            playerInputForward = Input.GetAxisRaw("Vertical");
+            m_moveDirection = new Vector3(playerInputHorizontal, 0, playerInputForward).normalized;
+            //rb.velocity = m_moveDirection * (playerSpeed) /** Time.fixedDeltaTime*/;
+
+            if(m_moveDirection.magnitude > 0)
+            {
+                
+                m_rotation = Quaternion.LookRotation(m_moveDirection);
+                m_myAnim.SetBool("IsMoving", true);
+                m_myAnim.SetBool("IsIdle", false);
+                m_myAnim.SetFloat("MovingFloat", m_moveDirection.magnitude);
+            }
+            else
+            {
+                //m_myAnim.SetFloat("MovingFloat", _MoveDirection.magnitude);
+                m_myAnim.SetBool("IsMoving", false);
+                m_myAnim.SetBool("IsIdle", true);
+            }
+
+            rb.Move(rb.position + playerSpeed * Time.fixedDeltaTime * m_moveDirection, Quaternion.Euler(0,m_rotation.eulerAngles.y,0));
+
         }
     }
 

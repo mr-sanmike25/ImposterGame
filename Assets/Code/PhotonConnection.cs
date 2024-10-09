@@ -37,7 +37,19 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
     void Start()
     {
         PhotonNetwork.ConnectUsingSettings();
+
+        //StartCoroutine(ActivateCanvasAgain());
     }
+
+    /*IEnumerator ActivateCanvasAgain()
+    {
+        yield return new WaitForSeconds(2.0f);
+
+        print("Se ha entrado al Lobby Abstracto");
+        m_loadingCanvas.gameObject.SetActive(false);
+        m_menuCanvas.gameObject.SetActive(true);
+        PhotonNetwork.NickName = m_newNickname.text;
+    }*/
 
     public override void OnConnectedToMaster()
     {
@@ -64,16 +76,6 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
         /*print("Hubo un error al crear el room: " + message);
         m_createRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
         m_createRoomFailedTextMeshProUGUI.text = "Hubo un error al crear el room: " + m_roomInputField.text;*/
-
-        switch (gameMode)
-        {
-            case 1:
-                joinVSDefaultRoom();
-                break;
-            case 2:
-                JoinCoopDefaultRoom();
-                break;
-        }
     }
 
     public override void OnJoinRoomFailed(short returnCode, string message)
@@ -93,7 +95,34 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
         return roomOptions;
     }
 
-    public void joinVSDefaultRoom()
+    //public void joinVSDefaultRoom()
+    //{
+    //    if (m_newNickname.text.IsNullOrEmpty())
+    //    {
+    //        m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
+    //        m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
+    //        print("Necesita un nombre.");
+    //        return;
+    //    }
+    //    else
+    //    {
+    //        PhotonNetwork.NickName = m_newNickname.text;
+    //    }
+
+    //    /*if (m_newNickname.text == "")
+    //    {
+    //        m_joinRoomFailedTextMeshProUGUI.text = "Este espacio no lo puedes dejar en blanco.";
+    //        m_joinRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
+    //    }
+    //    else
+    //    {
+    //        PhotonNetwork.JoinRoom(m_roomInputField.text);
+    //    }*/
+
+    //    PhotonNetwork.JoinRoom("VSDefaultRoom");
+    //}
+
+    public void JoinOrCreateVSDefaultRoom()
     {
         if (m_newNickname.text.IsNullOrEmpty())
         {
@@ -104,91 +133,6 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
         }
         else
         {
-            gameMode = 1;
-            PhotonNetwork.NickName = m_newNickname.text;
-        }
-
-        /*if (m_newNickname.text == "")
-        {
-            m_joinRoomFailedTextMeshProUGUI.text = "Este espacio no lo puedes dejar en blanco.";
-            m_joinRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
-        }
-        else
-        {
-            PhotonNetwork.JoinRoom(m_roomInputField.text);
-        }*/
-
-        PhotonNetwork.JoinRoom("VSDefaultRoom");
-    }
-
-    public void createVSDefaultRoom()
-    {
-        if (m_newNickname.text.IsNullOrEmpty())
-        {
-            m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
-            m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
-            print("Necesita un nombre.");
-            return;
-        }
-        else
-        {
-            gameMode = 1;
-            PhotonNetwork.NickName = m_newNickname.text;
-        }
-
-        /*if (m_roomInputField.text == "")
-        {
-            m_createRoomFailedTextMeshProUGUI.text = "Este espacio no lo puedes dejar en blanco.";
-            m_createRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
-        }
-        else
-        {
-            PhotonNetwork.CreateRoom(m_roomInputField.text, NewRoomInfo(), null);
-        }*/
-
-        PhotonNetwork.CreateRoom("VSDefaultRoom", NewRoomInfo(), null);
-    }
-
-    public void JoinCoopDefaultRoom()
-    {
-        if (m_newNickname.text.IsNullOrEmpty())
-        {
-            m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
-            m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
-            print("Necesita un nombre.");
-            return;
-        }
-        else
-        {
-            gameMode = 2;
-            PhotonNetwork.NickName = m_newNickname.text;
-        }
-
-        /*if (m_newNickname.text == "")
-        {
-            m_joinRoomFailedTextMeshProUGUI.text = "Este espacio no lo puedes dejar en blanco.";
-            m_joinRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
-        }
-        else
-        {
-            PhotonNetwork.JoinRoom(m_roomInputField.text);
-        }*/
-
-        PhotonNetwork.JoinRoom("CoopDefaultRoom");
-    }
-
-    public void CreateCoopDefaultRoom()
-    {
-        if (m_newNickname.text.IsNullOrEmpty())
-        {
-            m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
-            m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
-            print("Necesita un nombre.");
-            return;
-        }
-        else
-        {
-            gameMode = 2;
             PhotonNetwork.NickName = m_newNickname.text;
         }
 
@@ -202,7 +146,62 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
             PhotonNetwork.CreateRoom(m_roomInputField.text, NewRoomInfo(), null);
         }*/
 
-        PhotonNetwork.CreateRoom("VSDefaultRoom", NewRoomInfo(), null);
+        PhotonNetwork.JoinOrCreateRoom("VSDefaultRoom", NewRoomInfo(), null);
+    }
+
+    //public void JoinCoopDefaultRoom()
+    //{
+    //    if (m_newNickname.text.IsNullOrEmpty())
+    //    {
+    //        m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
+    //        m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
+    //        print("Necesita un nombre.");
+    //        return;
+    //    }
+    //    else
+    //    {
+    //        gameMode = 2;
+    //        PhotonNetwork.NickName = m_newNickname.text;
+    //    }
+
+    //    /*if (m_newNickname.text == "")
+    //    {
+    //        m_joinRoomFailedTextMeshProUGUI.text = "Este espacio no lo puedes dejar en blanco.";
+    //        m_joinRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
+    //    }
+    //    else
+    //    {
+    //        PhotonNetwork.JoinRoom(m_roomInputField.text);
+    //    }*/
+
+    //    PhotonNetwork.JoinRoom("CoopDefaultRoom");
+    //}
+
+    public void JoinOrCreateCoopDefaultRoom()
+    {
+        if (m_newNickname.text.IsNullOrEmpty())
+        {
+            m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
+            m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
+            print("Necesita un nombre.");
+            return;
+        }
+        else
+        {
+            PhotonNetwork.NickName = m_newNickname.text;
+        }
+
+        /*if (m_roomInputField.text == "")
+        {
+            m_createRoomFailedTextMeshProUGUI.text = "Este espacio no lo puedes dejar en blanco.";
+            m_createRoomFailedTextMeshProUGUI.gameObject.SetActive(true);
+        }
+        else
+        {
+            PhotonNetwork.CreateRoom(m_roomInputField.text, NewRoomInfo(), null);
+        }*/
+         
+        PhotonNetwork.JoinOrCreateRoom("VSDefaultRoom", NewRoomInfo(), null);
     }
 
     public void PlayButton()

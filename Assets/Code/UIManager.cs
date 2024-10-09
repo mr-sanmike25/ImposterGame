@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
 
     public static UIManager Instance;
 
-    [SerializeField] TextMeshProUGUI m_TimerText;
+    //[SerializeField] TextMeshProUGUI m_TimerText;
 
     [SerializeField] TextMeshProUGUI m_gameInfo;
 
@@ -35,13 +35,13 @@ public class UIManager : MonoBehaviour
     {
         m_PV = GetComponent<PhotonView>();
         remainingTime = LevelNetworkManager.Instance.RemainingTime;
-        m_TimerText.text = "Time to start: " + remainingTime.ToString("0");
+        //m_TimerText.text = "Time to start: " + remainingTime.ToString("0");
     }
 
     private void Update()
     {
         remainingTime = LevelNetworkManager.Instance.RemainingTime;
-        m_TimerText.text = "Time to start: " + remainingTime.ToString("0");
+        //m_TimerText.text = "Time to start: " + remainingTime.ToString("0");
     }
 
     public void leaveCurrentRoomFromEditor()
