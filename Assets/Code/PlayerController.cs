@@ -12,9 +12,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
 {
     #region References
 
-    [SerializeField] protected Rigidbody rb;
-    [SerializeField] TextMeshPro m_nickname;
-    [SerializeField] protected Animator m_myAnim;
+    [SerializeField, HideInInspector] protected Rigidbody rb;
+    [SerializeField, HideInInspector] TextMeshPro m_nickname;
+    [SerializeField, HideInInspector] protected Animator m_myAnim;
     PhotonView m_PV;
 
     #endregion
@@ -41,6 +41,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         m_PV = GetComponent<PhotonView>();
         m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
+        m_nickname.text = PhotonNetwork.NickName;
         gameObject.name = m_PV.Owner.NickName;
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
@@ -49,6 +50,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void FixedUpdate()
     {
+        m_nickname.transform.position = new Vector3(transform.position.x, transform.position.y + 4.5f, transform.position.z);
+
         if (m_PV.IsMine)
         {
             playerInputHorizontal = Input.GetAxisRaw("Horizontal");
@@ -72,7 +75,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
             }
 
             rb.Move(rb.position + playerSpeed * Time.fixedDeltaTime * m_moveDirection, Quaternion.Euler(0,m_rotation.eulerAngles.y,0));
-
         }
     }
 
