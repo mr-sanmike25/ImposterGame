@@ -13,9 +13,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
     #region References
 
     [SerializeField, HideInInspector] protected Rigidbody rb;
-    [SerializeField] TextMeshPro m_nickname;
+    //[SerializeField] TextMeshPro m_nickname;
     [SerializeField, HideInInspector] protected Animator m_myAnim;
     [SerializeField] Transform m_cam;
+    [SerializeField] BoxCollider m_boxCollider;
     PhotonView m_PV;
 
     #endregion
@@ -30,11 +31,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     [SerializeField] protected float playerInputHorizontal;
     [SerializeField] protected float playerInputForward;
-    SpriteRenderer m_spriteRenderer;
     Vector3 m_moveDirection;
     Vector3 m_moveDirWithCam;
-    Quaternion m_rotation;
     float angle;
+    int m_life;
+    Player m_otherPlayer;
 
     #endregion
 
@@ -44,16 +45,66 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         m_PV = GetComponent<PhotonView>();
         //m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
-        m_nickname.text = m_PV.Owner.NickName;
+        //m_nickname.text = m_PV.Owner.NickName;
         gameObject.name = m_PV.Owner.NickName;
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
+        m_life = 1;
+        m_boxCollider.enabled = false;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            m_myAnim.SetBool("IsAttacking", true);
+            m_boxCollider.enabled = true;
+        }
+        else
+        {
+            m_myAnim.SetBool("IsAttacking", false);
+            m_boxCollider.enabled = false;
+        }
+        print("Live: " + m_life);
     }
 
     private void FixedUpdate()
     {
         //m_nickname.transform.position = new Vector3(transform.position.x, transform.position.y + 4.5f, transform.position.z);
+        PlayerMov();
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if(other.gameObject.tag == "Player")
+        {
+            m_otherPlayer = other.GetComponent<PhotonView>().Owner;
+            DamageOtherPlayer(m_otherPlayer);
+        }
+    }
+
+    #endregion
+
+    #region PublicMethods
+
+    // Esta es para que, cuando se llame a una función, lo que hacen estas funciones, se llaman automáticamente.
+    // En este caso, esta se le manda a todos los que andan en la partida.
+    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    {
+        if (changedProps.ContainsKey("damage"))
+        {
+            //Modificar la vida del usuario actual.
+            m_life -= (int)changedProps["damage"];
+        }
+    }
+
+    #endregion
+
+    #region LocalMethods
+
+    void PlayerMov()
+    {
         if (m_PV.IsMine)
         {
             playerInputHorizontal = Input.GetAxisRaw("Horizontal");
@@ -61,10 +112,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
             m_moveDirection = new Vector3(playerInputHorizontal, 0, playerInputForward).normalized;
             //rb.velocity = m_moveDirection * (playerSpeed) /** Time.fixedDeltaTime*/;
 
-            if(m_moveDirection.magnitude > 0.1f)
+            if (m_moveDirection.magnitude > 0.1f)
             {
                 angle = Mathf.Atan2(m_moveDirection.x, m_moveDirection.z) * Mathf.Rad2Deg + m_cam.eulerAngles.y;
-                transform.rotation = Quaternion.Euler(0, angle, 0);
+                transform.rotation = Quaternion.Euler(0, angle + 25.0f, 0);
                 m_myAnim.SetBool("IsMoving", true);
                 m_myAnim.SetBool("IsIdle", false);
                 m_myAnim.SetFloat("MovingFloat", m_moveDirection.magnitude);
@@ -81,10 +132,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
             rb.Move(rb.position + playerSpeed * m_moveDirWithCam.normalized * Time.fixedDeltaTime * m_moveDirection.magnitude, Quaternion.Euler(0.0f, angle, 0.0f));
         }
     }
-
-    #endregion
-
-    #region LocalMethods
 
     void ShowNickname(string p_nickname)
     {
@@ -106,13 +153,13 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    // Esta es para que, cuando se llame a una función, lo que hacen estas funciones, se llaman automáticamente.
-    // En este caso, esta se le manda a todos los que andan en la partida.
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    void DamageOtherPlayer(Player p_otherPlayer)
     {
-        if (!m_PV.IsMine && targetPlayer == m_PV.Owner)
+        if (PhotonNetwork.IsMasterClient)
         {
-            setNewColorPlayer((Color)changedProps["playerColor"]);
+            Hashtable playerStats = new Hashtable();
+            playerStats["damage"] = 1;
+            p_otherPlayer.SetCustomProperties(playerStats);
         }
     }
 
