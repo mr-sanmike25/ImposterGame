@@ -13,8 +13,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     #region References
 
     [SerializeField, HideInInspector] protected Rigidbody rb;
-    [SerializeField, HideInInspector] TextMeshPro m_nickname;
+    [SerializeField] TextMeshPro m_nickname;
     [SerializeField, HideInInspector] protected Animator m_myAnim;
+    [SerializeField] Transform m_cam;
     PhotonView m_PV;
 
     #endregion
@@ -31,7 +32,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] protected float playerInputForward;
     SpriteRenderer m_spriteRenderer;
     Vector3 m_moveDirection;
+    Vector3 m_moveDirWithCam;
     Quaternion m_rotation;
+    float angle;
 
     #endregion
 
@@ -40,8 +43,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
     private void Start()
     {
         m_PV = GetComponent<PhotonView>();
-        m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
-        m_nickname.text = PhotonNetwork.NickName;
+        //m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
+        m_nickname.text = m_PV.Owner.NickName;
         gameObject.name = m_PV.Owner.NickName;
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
@@ -50,8 +53,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void FixedUpdate()
     {
-        m_nickname.transform.position = new Vector3(transform.position.x, transform.position.y + 4.5f, transform.position.z);
-
+        //m_nickname.transform.position = new Vector3(transform.position.x, transform.position.y + 4.5f, transform.position.z);
         if (m_PV.IsMine)
         {
             playerInputHorizontal = Input.GetAxisRaw("Horizontal");
@@ -59,10 +61,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
             m_moveDirection = new Vector3(playerInputHorizontal, 0, playerInputForward).normalized;
             //rb.velocity = m_moveDirection * (playerSpeed) /** Time.fixedDeltaTime*/;
 
-            if(m_moveDirection.magnitude > 0)
+            if(m_moveDirection.magnitude > 0.1f)
             {
-                
-                m_rotation = Quaternion.LookRotation(m_moveDirection);
+                angle = Mathf.Atan2(m_moveDirection.x, m_moveDirection.z) * Mathf.Rad2Deg + m_cam.eulerAngles.y;
+                transform.rotation = Quaternion.Euler(0, angle, 0);
                 m_myAnim.SetBool("IsMoving", true);
                 m_myAnim.SetBool("IsIdle", false);
                 m_myAnim.SetFloat("MovingFloat", m_moveDirection.magnitude);
@@ -74,7 +76,9 @@ public class PlayerController : MonoBehaviourPunCallbacks
                 m_myAnim.SetBool("IsIdle", true);
             }
 
-            rb.Move(rb.position + playerSpeed * Time.fixedDeltaTime * m_moveDirection, Quaternion.Euler(0,m_rotation.eulerAngles.y,0));
+            m_moveDirWithCam = Quaternion.Euler(0.0f, angle, 0.0f) * Vector3.forward;
+
+            rb.Move(rb.position + playerSpeed * m_moveDirWithCam.normalized * Time.fixedDeltaTime * m_moveDirection.magnitude, Quaternion.Euler(0.0f, angle, 0.0f));
         }
     }
 
