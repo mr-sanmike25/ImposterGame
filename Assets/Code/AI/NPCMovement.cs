@@ -1,3 +1,4 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +8,12 @@ public class NPCMovement : MonoBehaviour
 {
     NavMeshAgent m_agent;
     [SerializeField] protected float m_moveRadius;
+    PhotonView m_PV;
 
     // Start is called before the first frame update
     void Start()
     {
+        m_PV = GetComponent<PhotonView>();
         m_agent = GetComponent<NavMeshAgent>();
     }
 

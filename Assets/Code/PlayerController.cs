@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField, HideInInspector] protected Animator m_myAnim;
     [SerializeField] Transform m_cam;
     [SerializeField] BoxCollider m_boxCollider;
+    [SerializeField] GameObject m_triggerCollision;
     PhotonView m_PV;
 
     #endregion
@@ -34,8 +35,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
     Vector3 m_moveDirection;
     Vector3 m_moveDirWithCam;
     float angle;
-    int m_life;
-    Player m_otherPlayer;
+    [SerializeField] int m_life;
+    //Player m_otherPlayer;
 
     #endregion
 
@@ -46,25 +47,28 @@ public class PlayerController : MonoBehaviourPunCallbacks
         m_PV = GetComponent<PhotonView>();
         //m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
         //m_nickname.text = m_PV.Owner.NickName;
-        gameObject.name = m_PV.Owner.NickName;
+        //gameObject.name = m_PV.Owner.NickName;
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
         m_life = 1;
         m_boxCollider.enabled = false;
+        //m_triggerCollision.SetActive(false);
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKey(KeyCode.E))
         {
             m_myAnim.SetBool("IsAttacking", true);
-            m_boxCollider.enabled = true;
+            //m_triggerCollision.SetActive(true);
+            //m_boxCollider.enabled = true;
         }
         else
         {
             m_myAnim.SetBool("IsAttacking", false);
-            m_boxCollider.enabled = false;
+            //m_triggerCollision.SetActive(false);
+            //m_boxCollider.enabled = false;
         }
         print("Live: " + m_life);
     }
@@ -75,18 +79,44 @@ public class PlayerController : MonoBehaviourPunCallbacks
         PlayerMov();
     }
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerStay(Collider p_other)
     {
-        if(other.gameObject.tag == "Player")
+        if (p_other.CompareTag("NPC"))
         {
-            m_otherPlayer = other.GetComponent<PhotonView>().Owner;
-            DamageOtherPlayer(m_otherPlayer);
+            PhotonNetwork.Destroy(p_other.gameObject);
+        }
+        else if (p_other.CompareTag("Damage"))
+        {
+            //m_otherPlayer = other.GetComponent<PhotonView>().Owner;
+            //DamageOtherPlayer(m_otherPlayer);
+
+            //if (m_PV.IsMine)
+            //{
+
+            //}
+
+            print("Moriste");
+
+            //m_PV.RPC("TakingDamage", RpcTarget.All, 1);
+
+            TakingDamage(1);
         }
     }
 
+    /*private void OnCollisionStay(Collision collision)
+    {
+        if(collision.gameObject.tag == "Damage")
+        {
+            if (m_PV.IsMine)
+            {
+                m_PV.RPC("TakingDamage", RpcTarget.All, 1);
+            }
+        }
+    }*/
+
     #endregion
 
-    #region PublicMethods
+    /*#region PublicMethods
 
     // Esta es para que, cuando se llame a una función, lo que hacen estas funciones, se llaman automáticamente.
     // En este caso, esta se le manda a todos los que andan en la partida.
@@ -99,7 +129,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    #endregion
+    #endregion*/
 
     #region LocalMethods
 
@@ -141,7 +171,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    void setNewColorPlayer(Color p_newColor)
+    /*void setNewColorPlayer(Color p_newColor)
     {
         gameObject.GetComponent<SpriteRenderer>().color = p_newColor;
 
@@ -151,15 +181,29 @@ public class PlayerController : MonoBehaviourPunCallbacks
             playerProperties["playerColor"] = p_newColor;
             PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         }
-    }
+    }*/
 
-    void DamageOtherPlayer(Player p_otherPlayer)
+    /*void DamageOtherPlayer(Player p_otherPlayer)
     {
         if (PhotonNetwork.IsMasterClient)
         {
             Hashtable playerStats = new Hashtable();
             playerStats["damage"] = 1;
             p_otherPlayer.SetCustomProperties(playerStats);
+        }
+    }*/
+
+    //[PunRPC]
+    void TakingDamage(int p_damage)
+    {
+        print("Se murió");
+
+        m_life -= p_damage;
+
+        if(m_life <= 0)
+        {
+            //Destroy(gameObject);
+            PhotonNetwork.Destroy(gameObject);
         }
     }
 
