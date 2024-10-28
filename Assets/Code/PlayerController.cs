@@ -47,7 +47,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         m_PV = GetComponent<PhotonView>();
         //m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
         //m_nickname.text = m_PV.Owner.NickName;
-        //gameObject.name = m_PV.Owner.NickName;
+        gameObject.name = m_PV.Owner.NickName;
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
@@ -58,19 +58,19 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void Update()
     {
-        if (Input.GetKey(KeyCode.E))
+        /*if (Input.GetKey(KeyCode.E))
         {
-            m_myAnim.SetBool("IsAttacking", true);
-            //m_triggerCollision.SetActive(true);
+            //m_myAnim.SetBool("IsAttacking", true);
+            m_triggerCollision.SetActive(true);
             //m_boxCollider.enabled = true;
         }
         else
         {
-            m_myAnim.SetBool("IsAttacking", false);
-            //m_triggerCollision.SetActive(false);
+            //m_myAnim.SetBool("IsAttacking", false);
+            m_triggerCollision.SetActive(false);
             //m_boxCollider.enabled = false;
         }
-        print("Live: " + m_life);
+        print("Live: " + m_life);*/
     }
 
     private void FixedUpdate()
@@ -204,6 +204,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         {
             //Destroy(gameObject);
             PhotonNetwork.Destroy(gameObject);
+            PhotonNetwork.LeaveRoom();
         }
     }
 
