@@ -6,6 +6,7 @@ using TMPro;
 using Photon.Realtime;
 using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
+using Unity.VisualScripting;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviourPunCallbacks
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] Transform m_cam;
     [SerializeField] BoxCollider m_boxCollider;
     [SerializeField] GameObject m_triggerCollision;
+    [SerializeField] ParticleSystem m_particleSystem;
     PhotonView m_PV;
 
     #endregion
@@ -53,24 +55,14 @@ public class PlayerController : MonoBehaviourPunCallbacks
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
         m_life = 1;
         m_boxCollider.enabled = false;
-        //m_triggerCollision.SetActive(false);
+        m_triggerCollision.SetActive(true);
+        m_particleSystem.Stop();
     }
 
     private void Update()
     {
-        /*if (Input.GetKey(KeyCode.E))
-        {
-            //m_myAnim.SetBool("IsAttacking", true);
-            m_triggerCollision.SetActive(true);
-            //m_boxCollider.enabled = true;
-        }
-        else
-        {
-            //m_myAnim.SetBool("IsAttacking", false);
-            m_triggerCollision.SetActive(false);
-            //m_boxCollider.enabled = false;
-        }
-        print("Live: " + m_life);*/
+        //ActivateCollCor();
+        print("Live: " + m_life);
     }
 
     private void FixedUpdate()
@@ -83,9 +75,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
     {
         if (p_other.CompareTag("NPC"))
         {
-            PhotonNetwork.Destroy(p_other.gameObject);
+            p_other.GetComponent<NPCMovement>().DestroyNPC();
+            //PhotonNetwork.Destroy(p_other.gameObject);
         }
-        else if (p_other.CompareTag("Damage"))
+        else if (p_other.CompareTag("Player"))
         {
             //m_otherPlayer = other.GetComponent<PhotonView>().Owner;
             //DamageOtherPlayer(m_otherPlayer);
@@ -99,7 +92,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
             //m_PV.RPC("TakingDamage", RpcTarget.All, 1);
 
-            TakingDamage(1);
+            p_other.GetComponent<PlayerController>().DestroyThisPlayer();
+
+            //TakeDamageFunct();
+
+            //TakingDamage(1);
         }
     }
 
@@ -158,7 +155,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
             }
 
             m_moveDirWithCam = Quaternion.Euler(0.0f, angle, 0.0f) * Vector3.forward;
-
+            m_triggerCollision.transform.rotation = Quaternion.Euler(0, angle + 25.0f, 0);
             rb.Move(rb.position + playerSpeed * m_moveDirWithCam.normalized * Time.fixedDeltaTime * m_moveDirection.magnitude, Quaternion.Euler(0.0f, angle, 0.0f));
         }
     }
@@ -193,7 +190,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }*/
 
-    //[PunRPC]
+    [PunRPC]
     void TakingDamage(int p_damage)
     {
         print("Se murió");
@@ -203,8 +200,43 @@ public class PlayerController : MonoBehaviourPunCallbacks
         if(m_life <= 0)
         {
             //Destroy(gameObject);
-            PhotonNetwork.Destroy(gameObject);
-            PhotonNetwork.LeaveRoom();
+            StartCoroutine(WaitForParticleSystem());
+            //PhotonNetwork.LeaveRoom();
+        }
+    }
+
+    public void DestroyThisPlayer()
+    {
+        m_PV.RPC("TakingDamage", RpcTarget.AllBuffered);
+    }
+
+    IEnumerator WaitForParticleSystem()
+    {
+        m_particleSystem.Play();
+
+        yield return new WaitForSeconds(m_particleSystem.main.duration);
+
+        PhotonNetwork.Destroy(gameObject);
+    }
+
+    void ActivateCollCor()
+    {
+        m_PV.RPC("ActivateDamageCollision", RpcTarget.AllBuffered);
+    }
+
+    void ActivateDamageCollision()
+    {
+        if (Input.GetKey(KeyCode.E))
+        {
+            //m_myAnim.SetBool("IsAttacking", true);
+            m_triggerCollision.SetActive(true);
+            //m_boxCollider.enabled = true;
+        }
+        else
+        {
+            //m_myAnim.SetBool("IsAttacking", false);
+            m_triggerCollision.SetActive(false);
+            //m_boxCollider.enabled = false;
         }
     }
 

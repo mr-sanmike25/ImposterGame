@@ -8,6 +8,7 @@ public class NPCMovement : MonoBehaviour
 {
     NavMeshAgent m_agent;
     [SerializeField] protected float m_moveRadius;
+    [SerializeField] ParticleSystem m_particleSystem;
     PhotonView m_PV;
 
     // Start is called before the first frame update
@@ -15,6 +16,8 @@ public class NPCMovement : MonoBehaviour
     {
         m_PV = GetComponent<PhotonView>();
         m_agent = GetComponent<NavMeshAgent>();
+        //m_particleSystem = GetComponent<ParticleSystem>();
+        m_particleSystem.Stop();
     }
 
     // Update is called once per frame
@@ -37,5 +40,26 @@ public class NPCMovement : MonoBehaviour
         {
             m_agent.SetDestination(m_hit.position);
         }
+    }
+
+    public void DestroyNPC()
+    {
+        m_agent.speed = 0;
+        m_PV.RPC("DestroyCurrentNPC", RpcTarget.All);
+    }
+
+    [PunRPC]
+    void DestroyCurrentNPC()
+    {
+        StartCoroutine(WaitForParticleSystem());
+    }
+
+    IEnumerator WaitForParticleSystem()
+    {
+        m_particleSystem.Play();
+
+        yield return new WaitForSeconds(m_particleSystem.main.duration);
+
+        PhotonNetwork.Destroy(gameObject);
     }
 }
