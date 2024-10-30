@@ -73,7 +73,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void OnTriggerStay(Collider p_other)
     {
-        if (p_other.CompareTag("NPC"))
+        if (p_other.CompareTag("NPC") && Input.GetKey(KeyCode.E))
         {
             p_other.GetComponent<NPCMovement>().DestroyNPC();
             //PhotonNetwork.Destroy(p_other.gameObject);
