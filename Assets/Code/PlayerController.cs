@@ -78,8 +78,16 @@ public class PlayerController : MonoBehaviourPunCallbacks
             p_other.GetComponent<NPCMovement>().DestroyNPC();
             //PhotonNetwork.Destroy(p_other.gameObject);
         }
-        else if (p_other.CompareTag("Player"))
+        else if (p_other.CompareTag("Damage"))
         {
+            if (m_PV.IsMine)
+            {
+                print("Moriste");
+
+                m_PV.RPC("TakingDamage", RpcTarget.All, 1);
+
+                //p_other.GetComponent<PlayerController>().DestroyThisPlayer();
+            }
             //m_otherPlayer = other.GetComponent<PhotonView>().Owner;
             //DamageOtherPlayer(m_otherPlayer);
 
@@ -87,12 +95,6 @@ public class PlayerController : MonoBehaviourPunCallbacks
             //{
 
             //}
-
-            print("Moriste");
-
-            //m_PV.RPC("TakingDamage", RpcTarget.All, 1);
-
-            p_other.GetComponent<PlayerController>().DestroyThisPlayer();
 
             //TakeDamageFunct();
 
@@ -205,17 +207,10 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }
 
-    public void DestroyThisPlayer()
-    {
-        m_PV.RPC("TakingDamage", RpcTarget.AllBuffered);
-    }
-
     IEnumerator WaitForParticleSystem()
     {
         m_particleSystem.Play();
-
         yield return new WaitForSeconds(m_particleSystem.main.duration);
-
         PhotonNetwork.Destroy(gameObject);
     }
 
