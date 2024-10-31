@@ -19,7 +19,7 @@ public class SpawnerManager : MonoBehaviour
 
         if (m_PV.IsMine)
         {
-
+            PhotonNetwork.Instantiate("LevelManager", transform.position, Quaternion.identity);
         }
     }
 }

@@ -7,6 +7,7 @@ using Photon.Realtime;
 using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Unity.VisualScripting;
+using ExitGames.Client.Photon.StructWrapping;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviourPunCallbacks
@@ -16,10 +17,15 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField, HideInInspector] protected Rigidbody rb;
     //[SerializeField] TextMeshPro m_nickname;
     [SerializeField, HideInInspector] protected Animator m_myAnim;
+
     [SerializeField] Transform m_cam;
     [SerializeField] BoxCollider m_boxCollider;
     [SerializeField] GameObject m_triggerCollision;
     [SerializeField] ParticleSystem m_particleSystem;
+
+    [Header("UI Player")]
+    [SerializeField] TextMeshProUGUI m_currentRoleText;
+
     PhotonView m_PV;
 
     #endregion
@@ -57,16 +63,31 @@ public class PlayerController : MonoBehaviourPunCallbacks
         m_boxCollider.enabled = false;
         m_triggerCollision.SetActive(true);
         m_particleSystem.Stop();
+
+        GetNewGameplayRole();
     }
 
     private void Update()
     {
+        if (!m_PV.IsMine)
+        {
+            return;
+        }
         //ActivateCollCor();
         print("Live: " + m_life);
+
+        if (LevelManager.instance.GetCurrentState == LevelManagerState.Playing)
+        {
+            GetNewGameplayRole() ;
+        }
     }
 
     private void FixedUpdate()
     {
+        if (!m_PV.IsMine)
+        {
+            return;
+        }
         //m_nickname.transform.position = new Vector3(transform.position.x, transform.position.y + 4.5f, transform.position.z);
         PlayerMov();
     }
@@ -232,6 +253,30 @@ public class PlayerController : MonoBehaviourPunCallbacks
             //m_myAnim.SetBool("IsAttacking", false);
             m_triggerCollision.SetActive(false);
             //m_boxCollider.enabled = false;
+        }
+    }
+
+    void GetNewGameplayRole()
+    {
+        if (PhotonNetwork.LocalPlayer.CustomProperties.TryGetValue("Role", out object role))
+        {
+            //LevelManager.AssignRole();
+
+            string m_newPlayerRole = role.ToString();
+
+            switch (m_newPlayerRole)
+            {
+                case "INNOCENT":
+                    //Soy inocente
+                    m_currentRoleText.text = "Innocent";
+                    m_currentRoleText.color = Color.blue;
+                    break;
+                case "TRAITOR":
+                    //Soy una rata
+                    m_currentRoleText.text = "Traitor";
+                    m_currentRoleText.color = Color.red;
+                    break;
+            }
         }
     }
 
