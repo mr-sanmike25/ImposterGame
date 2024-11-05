@@ -15,21 +15,72 @@ public class LevelManager : MonoBehaviourPunCallbacks
 
     LevelManagerState m_currentState;
 
+    #region UnityMethods
     private void Awake()
     {
         if (instance == null)
         {
             instance = this;
+            m_PV = GetComponent<PhotonView>();
         }
         else
         {
             Destroy(instance);
         }
     }
+    private void Start()
+    {
+        m_PV = GetComponent<PhotonView>();
+        SetLevelManagerState(LevelManagerState.Waiting);
+
+        if (PhotonNetwork.IsMasterClient)
+        {
+
+        }
+    }
+
+    private void OnEnable()
+    {
+        PhotonNetwork.AddCallbackTarget(this);
+    }
+
+    private void OnDisable()
+    {
+        PhotonNetwork.RemoveCallbackTarget(this);
+    }
+
+    #endregion UnityMethods
+
+    #region FSMMethods
+    /// <summary>
+    /// Inicializa el estado de Playing
+    /// </summary>
+    void Playing()
+    {
+        SetNewRoleEvent();
+        AssignRole();
+    }
+    #endregion FSMMethods
+
+    #region LocalMethods
+
+    /// <summary>
+    /// Levanta el evento cuando los jugadores estén listos para la partida
+    /// </summary>
+    private void SetNewRoleEvent()
+    {
+        byte m_ID = 1; //Código del evento 1 - 199
+        object content = "Listo para la partida"; //Se puede descomponer cualquier cosa.
+        RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+        PhotonNetwork.RaiseEvent(m_ID, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+    #endregion LocalMethods
+
+    #region PublicMethods
 
     public void SetLevelManagerState(LevelManagerState p_newState)
     {
-        if(p_newState == m_currentState)
+        if (p_newState == m_currentState)
         {
             return;
         }
@@ -45,27 +96,6 @@ public class LevelManager : MonoBehaviourPunCallbacks
                 Playing();
                 break;
         }
-    }
-
-    void Playing()
-    {
-        AssignRole();
-    }
-
-    private void Start()
-    {
-        m_PV = GetComponent<PhotonView>();
-        SetLevelManagerState(LevelManagerState.Waiting);
-
-        if (PhotonNetwork.IsMasterClient)
-        {
-
-        }
-    }
-
-    public LevelManagerState GetCurrentState
-    {
-        get { return m_currentState; }
     }
 
     /*public LevelManagerState GetLevelManagerState()
@@ -97,8 +127,18 @@ public class LevelManager : MonoBehaviourPunCallbacks
             SetLevelManagerState(LevelManagerState.Playing);
         }
     }
+
+    #endregion PublicMethods
+
+    #region Getters&Setters
+    public LevelManagerState GetCurrentState
+    {
+        get { return m_currentState; }
+    }
+    #endregion Getters&Setters
 }
 
+#region Enums
 public enum LevelManagerState
 {
     None,
@@ -111,3 +151,4 @@ public enum GameplayRole
     Innocent,
     Traitor,
 }
+#endregion Enums

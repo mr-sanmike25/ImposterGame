@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [SerializeField] BoxCollider m_boxCollider;
     [SerializeField] GameObject m_triggerCollision;
     [SerializeField] ParticleSystem m_particleSystem;
+    [SerializeField] GameObject m_particleGO;
 
     [Header("UI Player")]
     [SerializeField] TextMeshProUGUI m_currentRoleText;
@@ -62,9 +63,8 @@ public class PlayerController : MonoBehaviourPunCallbacks
         m_life = 1;
         m_boxCollider.enabled = false;
         m_triggerCollision.SetActive(true);
+        m_particleGO.SetActive(false);
         m_particleSystem.Stop();
-
-        GetNewGameplayRole();
     }
 
     private void Update()
@@ -134,24 +134,46 @@ public class PlayerController : MonoBehaviourPunCallbacks
         }
     }*/
 
+    private void OnEnable()
+    {
+        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+    }
+
+    private void OnDisable()
+    {
+        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+    }
+
     #endregion
 
-    /*#region PublicMethods
+    #region PublicMethods
 
     // Esta es para que, cuando se llame a una función, lo que hacen estas funciones, se llaman automáticamente.
     // En este caso, esta se le manda a todos los que andan en la partida.
-    public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
-    {
-        if (changedProps.ContainsKey("damage"))
-        {
-            //Modificar la vida del usuario actual.
-            m_life -= (int)changedProps["damage"];
-        }
-    }
+    //public override void OnPlayerPropertiesUpdate(Player targetPlayer, Hashtable changedProps)
+    //{
+    //    if (changedProps.ContainsKey("damage"))
+    //    {
+    //        //Modificar la vida del usuario actual.
+    //        m_life -= (int)changedProps["damage"];
+    //    }
+    //}
 
-    #endregion*/
+    #endregion
 
     #region LocalMethods
+
+    private void OnEvent(EventData photonEvent)
+    {
+        byte eventCode = photonEvent.Code;
+        if(eventCode == 1)
+        {
+            string data = (string)photonEvent.CustomData;
+            //Hacer algo con el string
+
+            GetNewGameplayRole();
+        }
+    }
 
     void PlayerMov()
     {
@@ -230,6 +252,7 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     IEnumerator WaitForParticleSystem()
     {
+        m_particleGO.SetActive(true);
         m_particleSystem.Play();
         yield return new WaitForSeconds(m_particleSystem.main.duration);
         PhotonNetwork.Destroy(gameObject);
