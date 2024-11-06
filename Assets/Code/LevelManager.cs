@@ -7,7 +7,7 @@ using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
 
-public class LevelManager : MonoBehaviourPunCallbacks
+public class LevelManager : MonoBehaviourPunCallbacks/*, IOnEventCallback*/
 {
     public static LevelManager instance;
 
@@ -39,15 +39,15 @@ public class LevelManager : MonoBehaviourPunCallbacks
         }
     }
 
-    private void OnEnable()
-    {
-        PhotonNetwork.AddCallbackTarget(this);
-    }
+    //private void OnEnable()
+    //{
+    //    PhotonNetwork.AddCallbackTarget(this);
+    //}
 
-    private void OnDisable()
-    {
-        PhotonNetwork.RemoveCallbackTarget(this);
-    }
+    //private void OnDisable()
+    //{
+    //    PhotonNetwork.RemoveCallbackTarget(this);
+    //}
 
     #endregion UnityMethods
 
@@ -57,8 +57,8 @@ public class LevelManager : MonoBehaviourPunCallbacks
     /// </summary>
     void Playing()
     {
-        SetNewRoleEvent();
         AssignRole();
+        SetNewRoleEvent();
     }
     #endregion FSMMethods
 
@@ -70,9 +70,27 @@ public class LevelManager : MonoBehaviourPunCallbacks
     private void SetNewRoleEvent()
     {
         byte m_ID = 1; //Código del evento 1 - 199
-        object content = "Listo para la partida"; //Se puede descomponer cualquier cosa.
+        object content = "Asignación de nuevo rol..."; //Se puede descomponer cualquier cosa.
         RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+
         PhotonNetwork.RaiseEvent(m_ID, content, raiseEventOptions, SendOptions.SendReliable);
+    }
+
+    void AssignRole()
+    {
+        print("Se crea Hashtable con la asignación de nuevo rol");
+        Player[] m_playersArray = PhotonNetwork.PlayerList;
+        GameplayRole[] m_gameplayRole = { GameplayRole.Innocent, GameplayRole.Traitor };
+
+        m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
+
+        for (int i = 0; i > m_playersArray.Length; ++i)
+        {
+            Hashtable m_playerProperties = new Hashtable();
+            m_playerProperties["Role"] = m_gameplayRole[i % m_gameplayRole.Length].ToString();
+
+            m_playersArray[i].SetCustomProperties(m_playerProperties);
+        }
     }
     #endregion LocalMethods
 
@@ -104,31 +122,39 @@ public class LevelManager : MonoBehaviourPunCallbacks
     }*/
 
     //Falta asignar cuántos roles hay según el jugador
-    public static void AssignRole()
-    {
-        print("Asignación de rol");
-        Player[] m_playersArray = PhotonNetwork.PlayerList;
-        GameplayRole[] m_gameplayRole = { GameplayRole.Innocent, GameplayRole.Traitor };
-
-        m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
-
-        for(int i = 0; i > m_playersArray.Length; ++i)
-        {
-            Hashtable m_playerProperties = new Hashtable();
-            m_playerProperties["Role"] = m_gameplayRole[i % m_gameplayRole.Length].ToString();
-            m_playersArray[i].SetCustomProperties(m_playerProperties);
-        }
-    }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (PhotonNetwork.CurrentRoom.PlayerCount >= 4)
+        if (PhotonNetwork.CurrentRoom.PlayerCount >= 1)
         {
-            SetLevelManagerState(LevelManagerState.Playing);
+            StartCoroutine(TimerToStart());
         }
     }
 
+    //public void OnEvent(EventData photonEvent)
+    //{
+    //    byte eventCode = photonEvent.Code;
+    //    if (eventCode == 1)
+    //    {
+    //        string data = (string)photonEvent.CustomData;
+    //        //Hacer algo con el string
+
+    //        //GetNewGameplayRole();
+    //    }
+    //}
+
     #endregion PublicMethods
+
+    #region Enumerators
+
+    //Probablemente se necesite RPC
+    IEnumerator TimerToStart()
+    {
+        yield return new WaitForSeconds(3);
+        SetLevelManagerState(LevelManagerState.Playing);
+    }
+
+    #endregion Enumerators
 
     #region Getters&Setters
     public LevelManagerState GetCurrentState

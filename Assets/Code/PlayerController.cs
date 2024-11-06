@@ -8,10 +8,10 @@ using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Unity.VisualScripting;
 using ExitGames.Client.Photon.StructWrapping;
+using System.Linq;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviourPunCallbacks
-{
+public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
     #region References
 
     [SerializeField, HideInInspector] protected Rigidbody rb;
@@ -74,12 +74,12 @@ public class PlayerController : MonoBehaviourPunCallbacks
             return;
         }
         //ActivateCollCor();
-        print("Live: " + m_life);
+        //print("Live: " + m_life);
 
-        if (LevelManager.instance.GetCurrentState == LevelManagerState.Playing)
+        /*if (LevelManager.instance.GetCurrentState == LevelManagerState.Playing)
         {
             GetNewGameplayRole() ;
-        }
+        }*/
     }
 
     private void FixedUpdate()
@@ -136,12 +136,11 @@ public class PlayerController : MonoBehaviourPunCallbacks
 
     private void OnEnable()
     {
-        PhotonNetwork.NetworkingClient.EventReceived += OnEvent;
+        PhotonNetwork.AddCallbackTarget(this);
     }
-
     private void OnDisable()
     {
-        PhotonNetwork.NetworkingClient.EventReceived -= OnEvent;
+        PhotonNetwork.RemoveCallbackTarget(this);
     }
 
     #endregion
@@ -159,21 +158,34 @@ public class PlayerController : MonoBehaviourPunCallbacks
     //    }
     //}
 
-    #endregion
-
-    #region LocalMethods
-
-    private void OnEvent(EventData photonEvent)
+    public void OnEvent(EventData photonEvent)
     {
         byte eventCode = photonEvent.Code;
-        if(eventCode == 1)
+
+        switch (eventCode)
+        {
+            case 1: // Evento de asignación de roles.
+                print("Ahhhhhhhhhh");
+                GetNewGameplayRole();
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+        }
+
+        /*if (eventCode == 1)
         {
             string data = (string)photonEvent.CustomData;
             //Hacer algo con el string
 
             GetNewGameplayRole();
-        }
+        }*/
     }
+
+    #endregion
+
+    #region LocalMethods
 
     void PlayerMov()
     {
@@ -238,15 +250,18 @@ public class PlayerController : MonoBehaviourPunCallbacks
     [PunRPC]
     void TakingDamage(int p_damage)
     {
-        print("Se murió");
-
-        m_life -= p_damage;
-
-        if(m_life <= 0)
+        if (m_PV.IsMine)
         {
-            //Destroy(gameObject);
-            StartCoroutine(WaitForParticleSystem());
-            //PhotonNetwork.LeaveRoom();
+            print("Se murió");
+
+            m_life -= p_damage;
+
+            if (m_life <= 0)
+            {
+                //Destroy(gameObject);
+                StartCoroutine(WaitForParticleSystem());
+                //PhotonNetwork.LeaveRoom();
+            }
         }
     }
 
