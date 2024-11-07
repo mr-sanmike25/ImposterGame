@@ -9,6 +9,7 @@ using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Unity.VisualScripting;
 using ExitGames.Client.Photon.StructWrapping;
 using System.Linq;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
@@ -22,7 +23,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
     [SerializeField] BoxCollider m_boxCollider;
     [SerializeField] GameObject m_triggerCollision;
     [SerializeField] ParticleSystem m_particleSystem;
-    [SerializeField] GameObject m_particleGO;
 
     [Header("UI Player")]
     [SerializeField] TextMeshProUGUI m_currentRoleText;
@@ -57,13 +57,13 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         //m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
         //m_nickname.text = m_PV.Owner.NickName;
         gameObject.name = m_PV.Owner.NickName;
+        m_particleSystem = GetComponent<ParticleSystem>();
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
         m_life = 1;
         m_boxCollider.enabled = false;
         m_triggerCollision.SetActive(true);
-        m_particleGO.SetActive(false);
         m_particleSystem.Stop();
     }
 
@@ -267,7 +267,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
 
     IEnumerator WaitForParticleSystem()
     {
-        m_particleGO.SetActive(true);
         m_particleSystem.Play();
         yield return new WaitForSeconds(m_particleSystem.main.duration);
         PhotonNetwork.Destroy(gameObject);
@@ -304,13 +303,15 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
 
             switch (m_newPlayerRole)
             {
-                case "INNOCENT":
+                case "Innocent":
                     //Soy inocente
+                    //gameObject.GetComponentInChildren<TextMeshPro>().text = "Innocent";
                     m_currentRoleText.text = "Innocent";
                     m_currentRoleText.color = Color.blue;
                     break;
-                case "TRAITOR":
+                case "Traitor":
                     //Soy una rata
+                    //gameObject.GetComponentInChildren<TextMeshPro>().text = "Traitor";
                     m_currentRoleText.text = "Traitor";
                     m_currentRoleText.color = Color.red;
                     break;

@@ -9,9 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5035362389272397469}
-  - component: {fileID: 7595725823590578019}
+  - component: {fileID: 431231738072704900}
   - component: {fileID: 5392707227645647887}
-  - component: {fileID: 3287763115444336657}
   m_Layer: 0
   m_Name: LevelManager
   m_TagString: Untagged
@@ -34,7 +33,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7595725823590578019
+--- !u!114 &431231738072704900
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -43,7 +42,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7328055455761173654}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f7d03262b7299c479ef9e6895865d77, type: 3}
+  m_Script: {fileID: 11500000, guid: 30bc86ff3df3365469e9f1239f40a6d0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &5392707227645647887
@@ -64,24 +63,7 @@ MonoBehaviour:
   Synchronization: 3
   OwnershipTransfer: 0
   observableSearch: 2
-  ObservedComponents:
-  - {fileID: 3287763115444336657}
+  ObservedComponents: []
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
---- !u!114 &3287763115444336657
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7328055455761173654}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SynchronizePosition: 1
-  m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
-  m_UseLocal: 1
