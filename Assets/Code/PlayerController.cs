@@ -57,14 +57,12 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         //m_PV.Owner.NickName = PhotonNetwork.NickName; // NO PEDIRLO NUNCA MÁS DE UNA VEZ.
         //m_nickname.text = m_PV.Owner.NickName;
         gameObject.name = m_PV.Owner.NickName;
-        m_particleSystem = GetComponent<ParticleSystem>();
         m_myAnim.SetBool("IsMoving", false);
         m_myAnim.SetBool("IsIdle", true);
         PhotonPeer.RegisterType(typeof(Color), (byte)'C', TypeTransformer.SerializeColor, TypeTransformer.DeserializeColor);
         m_life = 1;
         m_boxCollider.enabled = false;
         m_triggerCollision.SetActive(true);
-        m_particleSystem.Stop();
     }
 
     private void Update()
@@ -80,6 +78,14 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         {
             GetNewGameplayRole() ;
         }*/
+        if (Input.GetKey(KeyCode.E))
+        {
+            m_triggerCollision.tag = "Damage";
+        }
+        else if (Input.GetKeyUp(KeyCode.E))
+        {
+            m_triggerCollision.tag = "Player";
+        }
     }
 
     private void FixedUpdate()
@@ -92,23 +98,18 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         PlayerMov();
     }
 
-    private void OnTriggerStay(Collider p_other)
+    private void OnTriggerEnter(Collider p_other)
     {
-        if (p_other.CompareTag("NPC") && Input.GetKey(KeyCode.E))
+        if (p_other.CompareTag("Damage"))
         {
-            p_other.GetComponent<NPCMovement>().DestroyNPC();
-            //PhotonNetwork.Destroy(p_other.gameObject);
-        }
-        else if (p_other.CompareTag("Damage"))
-        {
-            if (m_PV.IsMine)
-            {
-                print("Moriste");
+            //if (m_PV.IsMine)
+            //{
+            print("Moriste");
 
-                m_PV.RPC("TakingDamage", RpcTarget.All, 1);
+            m_PV.RPC("TakingDamage", RpcTarget.AllBuffered, 1);
 
                 //p_other.GetComponent<PlayerController>().DestroyThisPlayer();
-            }
+            //}
             //m_otherPlayer = other.GetComponent<PhotonView>().Owner;
             //DamageOtherPlayer(m_otherPlayer);
 
@@ -120,6 +121,15 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
             //TakeDamageFunct();
 
             //TakingDamage(1);
+        }
+    }
+
+    private void OnTriggerStay(Collider p_other)
+    {
+        if (p_other.CompareTag("NPC") && Input.GetKey(KeyCode.E))
+        {
+            p_other.GetComponent<NPCMovement>().DestroyNPC();
+            //PhotonNetwork.Destroy(p_other.gameObject);
         }
     }
 
@@ -165,7 +175,6 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         switch (eventCode)
         {
             case 1: // Evento de asignación de roles.
-                print("Ahhhhhhhhhh");
                 GetNewGameplayRole();
                 break;
             case 2:
@@ -250,47 +259,22 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
     [PunRPC]
     void TakingDamage(int p_damage)
     {
-        if (m_PV.IsMine)
+        m_life -= p_damage;
+
+        if (m_life <= 0)
         {
-            print("Se murió");
-
-            m_life -= p_damage;
-
-            if (m_life <= 0)
-            {
-                //Destroy(gameObject);
-                StartCoroutine(WaitForParticleSystem());
-                //PhotonNetwork.LeaveRoom();
-            }
+            //Destroy(gameObject);
+            StartCoroutine(WaitForParticleSystem());
+            //PhotonNetwork.LeaveRoom();
         }
     }
 
     IEnumerator WaitForParticleSystem()
     {
+        Instantiate(m_particleSystem, transform.position, Quaternion.identity);
         m_particleSystem.Play();
         yield return new WaitForSeconds(m_particleSystem.main.duration);
         PhotonNetwork.Destroy(gameObject);
-    }
-
-    void ActivateCollCor()
-    {
-        m_PV.RPC("ActivateDamageCollision", RpcTarget.AllBuffered);
-    }
-
-    void ActivateDamageCollision()
-    {
-        if (Input.GetKey(KeyCode.E))
-        {
-            //m_myAnim.SetBool("IsAttacking", true);
-            m_triggerCollision.SetActive(true);
-            //m_boxCollider.enabled = true;
-        }
-        else
-        {
-            //m_myAnim.SetBool("IsAttacking", false);
-            m_triggerCollision.SetActive(false);
-            //m_boxCollider.enabled = false;
-        }
     }
 
     void GetNewGameplayRole()
