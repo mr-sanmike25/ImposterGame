@@ -30,6 +30,11 @@ public class LevelManager : MonoBehaviourPunCallbacks
     {
         m_photonView = GetComponent<PhotonView>();
 
+        //if (PhotonNetwork.IsMasterClient)
+        //{
+        //    print("Soy el master client");
+        //}
+
         setLevelManagerSate(LevelManagerState.Waiting);
     }
     /// <summary>
@@ -82,45 +87,95 @@ public class LevelManager : MonoBehaviourPunCallbacks
     void assignRole(){
         print("Se crea Hastable con la asignacion del nuevo rol");
         Player[] m_playersArray = PhotonNetwork.PlayerList;
-        GameplayRole[] m_gameplayRole = { GameplayRole.Innocent, GameplayRole.Traitor };
-        List<GameplayRole> m_gameplayRolesLeft = new List<GameplayRole>(); //Creamos una lista con los roles, los cuales iremos eliminando.
+        //GameplayRole[] m_gameplayRole = { GameplayRole.Innocent, GameplayRole.Traitor };
+        List<GameplayRole> m_gameplayRole = new List<GameplayRole>();
 
-        for(int i = 0; i < m_gameplayRole.Length; ++i)
+        //Solución Roberto
+        if (m_playersArray.Length <= 4)
+        {
+            m_gameplayRole.Add(GameplayRole.Traitor);
+            for (int i = m_gameplayRole.Count; i < m_playersArray.Length; ++i)
+            {
+                m_gameplayRole.Add(GameplayRole.Innocent);
+            }
+        }
+
+        //m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
+        //m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToList();
+
+        for (int i = 0; i < m_playersArray.Length; ++i)
+        {
+            int index = Random.Range(0, m_gameplayRole.Count);
+            Hashtable m_playerProperties = new Hashtable();
+            m_playerProperties["Role"] = m_gameplayRole[index].ToString();
+            m_gameplayRole.RemoveAt(index);
+            m_playersArray[i].SetCustomProperties(m_playerProperties);
+        }
+
+        //Solución 1 Mike
+        //List<GameplayRole> m_gameplayRolesLeft = new List<GameplayRole>(); //Creamos una lista con los roles, los cuales iremos eliminando.
+
+        /*for(int i = 0; i < m_gameplayRole.Length; ++i)
         {
             m_gameplayRolesLeft.Add(m_gameplayRole[i]); //Llenamos la lista con los roles originales.
-        }
+        }*/
 
-        m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
-        m_gameplayRolesLeft = m_gameplayRole.OrderBy(x => Random.value).ToList(); //Revolvemos los elementos de la lista para tener aletoriedad.
+        //for (int i = 0; i < m_gameplayRole.Length / 2; ++i)
+        //{
+        //    m_gameplayRolesLeft.Add(m_gameplayRole[0]);
+        //}
+        //for (int i = m_gameplayRole.Length / 2; i < m_gameplayRole.Length; ++i)
+        //{
+        //    m_gameplayRolesLeft.Add(m_gameplayRole[1]); //Llenamos la lista con los roles originales.
+        //}
 
-        for (int i = 0; i < m_playersArray.Length; i++)
-        {
-            //Si el arreglo de jugadores es más chico que el de roles o si el iterador ya está en la diferencia entre número de jugadores y roles restantes,
-            //entonces que ya elija un rol aleatorio, lo asigne y luego vaya eliminando los elementos para que no se repitan.
-            if ((m_playersArray.Length <= m_gameplayRole.Length) || (i == (m_playersArray.Length - m_gameplayRole.Length)))
-            {
-                print(m_gameplayRolesLeft[0].ToString());
-                Hashtable m_playerProperties = new Hashtable();
-                m_playerProperties["Role"] = m_gameplayRolesLeft[/*i % m_gameplayRolesLeft.Count*/ Random.Range(0, m_gameplayRolesLeft.Count - 1)].ToString();
-                m_playersArray[i].SetCustomProperties(m_playerProperties);
-                m_gameplayRolesLeft.Remove(m_gameplayRolesLeft[0]);
-            }
-            else
-            {
-                //Si no se cumple lo anterior, que la computadora decida entonces sin limitaciones.
-                Hashtable m_playerProperties = new Hashtable();
-                m_playerProperties["Role"] = m_gameplayRole[/*i % m_gameplayRole.Length*/ Random.Range(0, m_gameplayRole.Length)].ToString();
+        /*m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
+        m_gameplayRolesLeft = m_gameplayRole.OrderBy(x => Random.value).ToList(); //Revolvemos los elementos de la lista para tener aletoriedad.*/
 
-                m_playersArray[i].SetCustomProperties(m_playerProperties);
-            }
-        }
+        //m_playersArray = m_playersArray.OrderBy(x => Random.value).ToArray();
 
-        print(m_gameplayRolesLeft.Count); //Para este punto será cero, ya que ya se han asignado todos los roles y, por ende, eliminado todos de la lista :P
+        //for (int i = 0; i < m_playersArray.Length; i++)
+        //{
+        //    //Si el arreglo de jugadores es más chico que el de roles o si el iterador ya está en la diferencia entre número de jugadores y roles restantes,
+        //    //entonces que ya elija un rol aleatorio, lo asigne y luego vaya eliminando los elementos para que no se repitan.
+        //    if ((m_playersArray.Length <= m_gameplayRole.Length) || (i == (m_playersArray.Length - m_gameplayRole.Length)))
+        //    {
+        //        print(m_gameplayRolesLeft[0].ToString());
+        //        Hashtable m_playerProperties = new Hashtable();
+        //        m_playerProperties["Role"] = m_gameplayRolesLeft[/*i % m_gameplayRolesLeft.Count*/ Random.Range(0, m_gameplayRolesLeft.Count - 1)].ToString();
+        //        m_playersArray[i].SetCustomProperties(m_playerProperties);
+        //        m_gameplayRolesLeft.Remove(m_gameplayRolesLeft[0]);
+        //    }
+        //    else
+        //    {
+        //        //Si no se cumple lo anterior, que la computadora decida entonces sin limitaciones.
+        //        Hashtable m_playerProperties = new Hashtable();
+        //        m_playerProperties["Role"] = m_gameplayRole[/*i % m_gameplayRole.Length*/ Random.Range(0, m_gameplayRole.Length)].ToString();
+
+        //        m_playersArray[i].SetCustomProperties(m_playerProperties);
+        //    }
+        //}
+
+        //Solución 2 Mike
+        //for (int i = 0; i < m_playersArray.Length / 2; ++i)
+        //{
+        //    Hashtable m_playerProperties = new Hashtable();
+        //    m_playerProperties["Role"] = m_gameplayRolesLeft[0].ToString();
+        //    m_playersArray[i].SetCustomProperties(m_playerProperties);
+        //}
+        //for (int i = m_playersArray.Length / 2; i < m_playersArray.Length; ++i)
+        //{
+        //    Hashtable m_playerProperties = new Hashtable();
+        //    m_playerProperties["Role"] = m_gameplayRolesLeft[1].ToString();
+        //    m_playersArray[i].SetCustomProperties(m_playerProperties);
+        //}
+
+        //print(m_gameplayRolesLeft.Count); //Para este punto será cero, ya que ya se han asignado todos los roles y, por ende, eliminado todos de la lista :P
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (PhotonNetwork.CurrentRoom.PlayerCount >= 2)
+        if (PhotonNetwork.CurrentRoom.PlayerCount >= 4)
         {
             StartCoroutine(timerToStart());
         }
