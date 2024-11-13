@@ -10,6 +10,7 @@ using Unity.VisualScripting;
 using ExitGames.Client.Photon.StructWrapping;
 using System.Linq;
 using UnityEngine.UI;
+using Photon.Pun.Demo.PunBasics;
 
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
@@ -26,6 +27,10 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
 
     [Header("UI Player")]
     [SerializeField] TextMeshProUGUI m_currentRoleText;
+
+    [SerializeField] protected string m_currentRoleName;
+    [SerializeField] public GameObject[] m_arrowParts;
+    [SerializeField] public Material[] m_materials;
 
     PhotonView m_PV;
 
@@ -196,6 +201,30 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
 
     #region LocalMethods
 
+    void deathEvent(string role)
+    {
+        if (m_PV.IsMine)
+        {
+            if (role == "Traitor")
+            {
+                byte m_ID = 2;//Codigo del Evento (1...199)
+                object content = role;
+                RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+
+                PhotonNetwork.RaiseEvent(m_ID, content, raiseEventOptions, SendOptions.SendReliable);
+            }
+            else if (role == "Innocent")
+            {
+                byte m_ID = 3;//Codigo del Evento (1...199)
+                object content = role;
+                RaiseEventOptions raiseEventOptions = new RaiseEventOptions { Receivers = ReceiverGroup.All };
+
+                PhotonNetwork.RaiseEvent(m_ID, content, raiseEventOptions, SendOptions.SendReliable);
+            }
+        }
+    }
+
+
     void PlayerMov()
     {
         if (m_PV.IsMine)
@@ -274,6 +303,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         Instantiate(m_particleSystem, transform.position, Quaternion.identity);
         m_particleSystem.Play();
         yield return new WaitForSeconds(m_particleSystem.main.duration);
+        deathEvent(m_currentRoleName);
         PhotonNetwork.Destroy(gameObject);
     }
 
@@ -291,13 +321,23 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
                     //Soy inocente
                     //gameObject.GetComponentInChildren<TextMeshPro>().text = "Innocent";
                     m_currentRoleText.text = "Innocent";
+                    m_currentRoleName = "Innocent";
                     m_currentRoleText.color = Color.blue;
+                    for(int i = 0; i < m_arrowParts.Length; ++i)
+                    {
+                        m_arrowParts[i].GetComponent<MeshRenderer>().material = m_materials[0];
+                    }
                     break;
                 case "Traitor":
                     //Soy una rata
                     //gameObject.GetComponentInChildren<TextMeshPro>().text = "Traitor";
                     m_currentRoleText.text = "Traitor";
+                    m_currentRoleName = "Traitor";
                     m_currentRoleText.color = Color.red;
+                    for (int i = 0; i < m_arrowParts.Length; ++i)
+                    {
+                        m_arrowParts[i].GetComponent<MeshRenderer>().material = m_materials[1];
+                    }
                     break;
             }
         }

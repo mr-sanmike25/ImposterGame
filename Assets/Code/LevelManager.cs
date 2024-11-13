@@ -6,10 +6,16 @@ using Photon.Realtime;
 using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
+using TMPro;
 
-public class LevelManager : MonoBehaviourPunCallbacks
+public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     public static LevelManager instance;
+
+    [SerializeField] int m_traitorsLeft;
+    [SerializeField] int m_innocentsLeft;
+
+    [SerializeField] TextMeshProUGUI m_Winnerstext;
 
     PhotonView m_photonView;
     LevelManagerState m_currentState;
@@ -37,6 +43,16 @@ public class LevelManager : MonoBehaviourPunCallbacks
 
         setLevelManagerSate(LevelManagerState.Waiting);
     }
+
+    private void OnEnable()
+    {
+        PhotonNetwork.AddCallbackTarget(this);
+    }
+    private void OnDisable()
+    {
+        PhotonNetwork.RemoveCallbackTarget(this);
+    }
+
     /// <summary>
     /// Levanta el Evento cuando los jugadores esten listos para la partida
     /// </summary>
@@ -94,9 +110,11 @@ public class LevelManager : MonoBehaviourPunCallbacks
         if (m_playersArray.Length <= 4)
         {
             m_gameplayRole.Add(GameplayRole.Traitor);
+            m_traitorsLeft = 1;
             for (int i = m_gameplayRole.Count; i < m_playersArray.Length; ++i)
             {
                 m_gameplayRole.Add(GameplayRole.Innocent);
+                m_innocentsLeft++;
             }
         }
 
@@ -175,7 +193,7 @@ public class LevelManager : MonoBehaviourPunCallbacks
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (PhotonNetwork.CurrentRoom.PlayerCount >= 4)
+        if (PhotonNetwork.CurrentRoom.PlayerCount >= 2)
         {
             StartCoroutine(timerToStart());
         }
@@ -206,12 +224,67 @@ public class LevelManager : MonoBehaviourPunCallbacks
     //        //Hacer algo con el string
     //    }
     //}
+
+    void retireTraitorWhoHasDied()
+    {
+        m_traitorsLeft--;
+
+        if (m_traitorsLeft == 0)
+        {
+            setLevelManagerSate(LevelManagerState.Finishing);
+            m_photonView.RPC("WinnersInfo", RpcTarget.All, "Ganaron los inocentes", Color.blue);
+        }
+    }
+
+    void retireInnocentWhoHasDied()
+    {
+        m_innocentsLeft--;
+
+        if (m_innocentsLeft == 0)
+        {
+            setLevelManagerSate(LevelManagerState.Finishing);
+            m_photonView.RPC("WinnersInfo", RpcTarget.All, "Ganaron los traidores", Color.red);
+        }
+    }
+
+    [PunRPC]
+    void WinnersInfo(string p_winners, Color p_winnersColor)
+    {
+        m_Winnerstext.text = p_winners;
+        m_Winnerstext.color = p_winnersColor;
+    }
+
+    public void OnEvent(EventData photonEvent)
+    {
+        byte eventCode = photonEvent.Code;
+
+        switch (eventCode)
+        {
+            case 1:
+                break;
+            case 2: // Evento de jugador que ha muerto.
+                retireTraitorWhoHasDied();
+                break;
+            case 3:
+                retireInnocentWhoHasDied();
+                break;
+        }
+
+        /*if (eventCode == 1)
+        {
+            string data = (string)photonEvent.CustomData;
+            //Hacer algo con el string
+
+            GetNewGameplayRole();
+        }*/
+    }
 }
 public enum LevelManagerState
 {
     None,
     Waiting,
-    Playing
+    Playing,
+    Finishing
 }
 
 

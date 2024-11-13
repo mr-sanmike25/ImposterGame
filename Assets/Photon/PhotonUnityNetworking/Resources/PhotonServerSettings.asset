@@ -49,6 +49,7 @@ MonoBehaviour:
   - DestroyCurrentNPC
   - DestroyCharacter
   - SetLevelManagerStateCorroutine
+  - WinnersInfo
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
