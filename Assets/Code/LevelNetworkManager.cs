@@ -40,9 +40,9 @@ public class LevelNetworkManager : MonoBehaviourPunCallbacks
         PhotonNetwork.LeaveRoom();
     }
 
-    public override void OnDisconnected(DisconnectCause cause)
+    public override void OnLeftRoom()
     {
-        base.OnDisconnected(cause);
+        PhotonNetwork.LoadLevel("Menu");
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)

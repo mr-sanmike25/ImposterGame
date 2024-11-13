@@ -7,10 +7,14 @@ using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
 using TMPro;
+using UnityEditor.Build.Reporting;
+using System;
 
 public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     public static LevelManager instance;
+
+    [Range(0.1f, 0.2f)][SerializeField] float m_traitorPercentage;
 
     [SerializeField] int m_traitorsLeft;
     [SerializeField] int m_innocentsLeft;
@@ -107,26 +111,57 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         List<GameplayRole> m_gameplayRole = new List<GameplayRole>();
 
         //Solución Roberto
-        if (m_playersArray.Length <= 4)
+        //if (m_playersArray.Length <= 4)
+        //{
+        //    m_gameplayRole.Add(GameplayRole.Traitor);
+        //    m_traitorsLeft = 1;
+        //    for (int i = m_gameplayRole.Count; i < m_playersArray.Length; ++i)
+        //    {
+        //        m_gameplayRole.Add(GameplayRole.Innocent);
+        //        m_innocentsLeft++;
+        //    }
+        //}
+
+        ////m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
+        ////m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToList();
+
+        //for (int i = 0; i < m_playersArray.Length; ++i)
+        //{
+        //    int index = Random.Range(0, m_gameplayRole.Count);
+        //    Hashtable m_playerProperties = new Hashtable();
+        //    m_playerProperties["Role"] = m_gameplayRole[index].ToString();
+        //    m_gameplayRole.RemoveAt(index);
+        //    m_playersArray[i].SetCustomProperties(m_playerProperties);
+        //}
+
+        List<GameplayRole> roles = new List<GameplayRole>();
+
+        int totalPlayers = m_playersArray.Length;
+        int traitorCount = Mathf.Max(1, Mathf.RoundToInt(totalPlayers * m_traitorPercentage));
+        int innocentCount = totalPlayers - traitorCount;
+
+        roles.AddRange(Enumerable.Repeat(GameplayRole.Traitor, traitorCount));
+        roles.AddRange(Enumerable.Repeat(GameplayRole.Innocent, traitorCount));
+
+        /*for(int i = 0; i < traitorCount; ++i)
         {
-            m_gameplayRole.Add(GameplayRole.Traitor);
-            m_traitorsLeft = 1;
-            for (int i = m_gameplayRole.Count; i < m_playersArray.Length; ++i)
-            {
-                m_gameplayRole.Add(GameplayRole.Innocent);
-                m_innocentsLeft++;
-            }
+            m_traitorsLeft++;
         }
 
-        //m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToArray();
-        //m_gameplayRole = m_gameplayRole.OrderBy(x => Random.value).ToList();
-
-        for (int i = 0; i < m_playersArray.Length; ++i)
+        for (int i = 0; i < innocentCount; ++i)
         {
-            int index = Random.Range(0, m_gameplayRole.Count);
+            m_innocentsLeft++;
+        }*/
+
+        m_traitorsLeft = traitorCount;
+        m_innocentsLeft = innocentCount;
+
+        shuffleRolesList(roles);
+
+        for(int i = 0; i < m_playersArray.Length; ++i)
+        {
             Hashtable m_playerProperties = new Hashtable();
-            m_playerProperties["Role"] = m_gameplayRole[index].ToString();
-            m_gameplayRole.RemoveAt(index);
+            m_playerProperties["Role"] = m_gameplayRole[i].ToString();
             m_playersArray[i].SetCustomProperties(m_playerProperties);
         }
 
@@ -189,6 +224,17 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //}
 
         //print(m_gameplayRolesLeft.Count); //Para este punto será cero, ya que ya se han asignado todos los roles y, por ende, eliminado todos de la lista :P
+    }
+
+    //Fisher-Yates Shuffle
+    void shuffleRolesList(List<GameplayRole> p_rolesList)
+    {
+        for (int i = p_rolesList.Count - 1; i > 0; i--){
+            int j = UnityEngine.Random.Range(0, i + 1);
+            GameplayRole temp_role = p_rolesList[j];
+            p_rolesList[i] = p_rolesList[j];
+            p_rolesList[i] = temp_role;
+        }
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
