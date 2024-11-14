@@ -7,6 +7,7 @@ using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
 using TMPro;
+using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -18,6 +19,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
     [SerializeField] int m_innocentsLeft;
 
     [SerializeField] TextMeshProUGUI m_Winnerstext;
+    [SerializeField] GameObject m_exitButton;
 
     PhotonView m_photonView;
     LevelManagerState m_currentState;
@@ -43,6 +45,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //    print("Soy el master client");
         //}
 
+        m_exitButton.SetActive(false);
         setLevelManagerSate(LevelManagerState.Waiting);
     }
 
@@ -89,8 +92,10 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
             case LevelManagerState.Playing:
                 playing();
                 break;
+            case LevelManagerState.Finishing:
+                m_photonView.RPC("activateExitButton", RpcTarget.All);
+                break;
         }
-
     }
     /// <summary>
     /// Inicializa el estado de Playing
@@ -132,6 +137,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //    m_playersArray[i].SetCustomProperties(m_playerProperties);
         //}
 
+        //Solución Carpi y ajustes Mike
         List<GameplayRole> roles = new List<GameplayRole>();
 
         int totalPlayers = m_playersArray.Length;
@@ -139,7 +145,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         int innocentCount = totalPlayers - traitorCount;
 
         roles.AddRange(Enumerable.Repeat(GameplayRole.Traitor, traitorCount));
-        roles.AddRange(Enumerable.Repeat(GameplayRole.Innocent, traitorCount));
+        roles.AddRange(Enumerable.Repeat(GameplayRole.Innocent, innocentCount));
 
         for(int i = 0; i < traitorCount; ++i)
         {
@@ -154,13 +160,15 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //m_traitorsLeft = traitorCount;
         //m_innocentsLeft = innocentCount;
 
-        shuffleRolesList(roles);
+        //shuffleRolesList(roles);
 
         for(int i = 0; i < m_playersArray.Length; i++)
         {
+            int randIndex = Random.Range(0, roles.Count);
             Hashtable m_playerProperties = new Hashtable();
-            m_playerProperties["Role"] = roles[i].ToString();
+            m_playerProperties["Role"] = roles[randIndex].ToString();
             m_playersArray[i].SetCustomProperties(m_playerProperties);
+            roles.RemoveAt(randIndex);
         }
 
         //Solución 1 Mike
@@ -233,6 +241,12 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
             p_rolesList[i] = p_rolesList[j];
             p_rolesList[i] = temp_role;
         }
+    }
+
+    [PunRPC]
+    void activateExitButton()
+    {
+        m_exitButton.SetActive(true);
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)

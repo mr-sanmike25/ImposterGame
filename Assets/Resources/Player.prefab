@@ -289,7 +289,7 @@ MonoBehaviour:
   m_cam: {fileID: 5287688254020611545}
   m_boxCollider: {fileID: 4902727412723239069}
   m_triggerCollision: {fileID: 5514097042647377155}
-  m_particleSystem: {fileID: 2312591318274358132, guid: 77da29788f3010e4396994ea52057980, type: 3}
+  m_particleSystem: {fileID: 5634767591545691480, guid: 05bc110473df9574f8a94afc5484e1b0, type: 3}
   m_currentRoleText: {fileID: 4918362508741934257}
   m_currentRoleName: 
   m_arrowParts:
@@ -2280,7 +2280,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6954029279871337204}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3373034, y: 0.56811523, z: -0.27423927, w: 0.6987592}
+  m_LocalRotation: {x: 0.33730337, y: 0.5681152, z: -0.27423918, w: 0.69875926}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -2456,7 +2456,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7356489730296229268}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.3358638, y: 0.5686788, z: -0.27306888, w: 0.6994522}
+  m_LocalRotation: {x: 0.33586377, y: 0.5686787, z: -0.27306876, w: 0.69945234}
   m_LocalPosition: {x: -2.083294, y: 4.4087105, z: -0.47888216}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

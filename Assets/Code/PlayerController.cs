@@ -91,6 +91,19 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         {
             m_triggerCollision.tag = "Player";
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if(m_currentRoleName == "")
+            {
+                LevelNetworkManager.Instance.disconnectFromCurrentRoom();
+            }
+            else
+            {
+                deathEvent(m_currentRoleName);
+                LevelNetworkManager.Instance.disconnectFromCurrentRoom();
+            }
+        }
     }
 
     private void FixedUpdate()
