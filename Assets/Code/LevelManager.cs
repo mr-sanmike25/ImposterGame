@@ -7,8 +7,6 @@ using ExitGames.Client.Photon;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using System.Linq;
 using TMPro;
-using UnityEditor.Build.Reporting;
-using System;
 
 public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
@@ -143,7 +141,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         roles.AddRange(Enumerable.Repeat(GameplayRole.Traitor, traitorCount));
         roles.AddRange(Enumerable.Repeat(GameplayRole.Innocent, traitorCount));
 
-        /*for(int i = 0; i < traitorCount; ++i)
+        for(int i = 0; i < traitorCount; ++i)
         {
             m_traitorsLeft++;
         }
@@ -151,17 +149,17 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         for (int i = 0; i < innocentCount; ++i)
         {
             m_innocentsLeft++;
-        }*/
+        }
 
-        m_traitorsLeft = traitorCount;
-        m_innocentsLeft = innocentCount;
+        //m_traitorsLeft = traitorCount;
+        //m_innocentsLeft = innocentCount;
 
         shuffleRolesList(roles);
 
-        for(int i = 0; i < m_playersArray.Length; ++i)
+        for(int i = 0; i < m_playersArray.Length; i++)
         {
             Hashtable m_playerProperties = new Hashtable();
-            m_playerProperties["Role"] = m_gameplayRole[i].ToString();
+            m_playerProperties["Role"] = roles[i].ToString();
             m_playersArray[i].SetCustomProperties(m_playerProperties);
         }
 
@@ -239,7 +237,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-        if (PhotonNetwork.CurrentRoom.PlayerCount >= 4)
+        if (PhotonNetwork.CurrentRoom.PlayerCount >= 2)
         {
             StartCoroutine(timerToStart());
         }
