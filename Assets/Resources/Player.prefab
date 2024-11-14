@@ -289,7 +289,7 @@ MonoBehaviour:
   m_cam: {fileID: 5287688254020611545}
   m_boxCollider: {fileID: 4902727412723239069}
   m_triggerCollision: {fileID: 5514097042647377155}
-  m_particleSystem: {fileID: 3302442364004722509, guid: 10434d6bf3af98b46a88ab696f543ee3, type: 3}
+  m_particleSystem: {fileID: 2312591318274358132, guid: 77da29788f3010e4396994ea52057980, type: 3}
   m_currentRoleText: {fileID: 4918362508741934257}
   m_currentRoleName: 
   m_arrowParts:

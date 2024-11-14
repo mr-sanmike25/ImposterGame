@@ -106,7 +106,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         print("Se crea Hastable con la asignacion del nuevo rol");
         Player[] m_playersArray = PhotonNetwork.PlayerList;
         //GameplayRole[] m_gameplayRole = { GameplayRole.Innocent, GameplayRole.Traitor };
-        List<GameplayRole> m_gameplayRole = new List<GameplayRole>();
+        //List<GameplayRole> m_gameplayRole = new List<GameplayRole>();
 
         //Solución Roberto
         //if (m_playersArray.Length <= 4)
