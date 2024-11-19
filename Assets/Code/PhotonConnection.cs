@@ -19,6 +19,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
     //[SerializeField] TextMeshProUGUI m_joinRoomFailedTextMeshProUGUI;
     //[SerializeField] TextMeshProUGUI m_createRoomFailedTextMeshProUGUI;
     [SerializeField] TextMeshProUGUI m_nicknameFailedTextMeshProUGUI;
+    [SerializeField] TextMeshProUGUI m_creditsTextMeshProUGUI;
 
     [SerializeField] Button m_playButton;
     [SerializeField] Button m_exitButton;
@@ -220,7 +221,8 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
             m_exitButton.gameObject.SetActive(false);
             m_backButton.gameObject.SetActive(true);
             m_vsModeButton.gameObject.SetActive(true);
-            m_coopModeButton.gameObject.SetActive(true);
+            //m_coopModeButton.gameObject.SetActive(true);
+            m_creditsTextMeshProUGUI.gameObject.SetActive(true);
         }
         else
         {
@@ -237,6 +239,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
 
     public void BackButton()
     {
+        m_creditsTextMeshProUGUI.gameObject.SetActive(false);
         m_menuModePanel.SetActive(true);
         m_selectModePanel.SetActive(false);
 
@@ -247,7 +250,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
         m_exitButton.gameObject.SetActive(true);
         m_backButton.gameObject.SetActive(false);
         m_vsModeButton.gameObject.SetActive(false);
-        m_coopModeButton.gameObject.SetActive(false);
+        //m_coopModeButton.gameObject.SetActive(false);
 
         gameMode = 0;
     }

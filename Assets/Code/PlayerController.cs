@@ -68,6 +68,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         m_life = 1;
         m_boxCollider.enabled = false;
         m_triggerCollision.SetActive(true);
+        m_particleSystem.gameObject.SetActive(false);
     }
 
     private void Update()
@@ -313,7 +314,9 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
 
     IEnumerator WaitForParticleSystem()
     {
-        Instantiate(m_particleSystem, transform.position, Quaternion.identity);
+        //PhotonNetwork.Instantiate("Tris Spark 2", this.gameObject.transform.position, Quaternion.identity);
+        //Instantiate(m_particleSystem, this.gameObject.transform.position, Quaternion.identity);
+        m_particleSystem.gameObject.SetActive(true);
         m_particleSystem.Play();
         yield return new WaitForSeconds(m_particleSystem.main.duration);
         deathEvent(m_currentRoleName);
