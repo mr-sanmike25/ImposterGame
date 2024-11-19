@@ -33,8 +33,6 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
     [SerializeField] Canvas m_loadingCanvas;
     [SerializeField] Canvas m_menuCanvas;
 
-    [SerializeField] int gameMode = 0;
-
     void Start()
     {
         PhotonNetwork.ConnectUsingSettings();

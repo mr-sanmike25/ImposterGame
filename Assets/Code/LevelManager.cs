@@ -247,6 +247,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
     void activateExitButton()
     {
         m_exitButton.SetActive(true);
+        Cursor.visible = true;
     }
 
     public override void OnPlayerEnteredRoom(Player newPlayer)
