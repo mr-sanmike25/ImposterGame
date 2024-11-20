@@ -62,6 +62,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
         m_loadingCanvas.gameObject.SetActive(false);
         m_menuCanvas.gameObject.SetActive(true);
         PhotonNetwork.NickName = m_newNickname.text;
+        Cursor.visible = true;
     }
 
     public override void OnJoinedRoom()
@@ -249,7 +250,5 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
         m_backButton.gameObject.SetActive(false);
         m_vsModeButton.gameObject.SetActive(false);
         //m_coopModeButton.gameObject.SetActive(false);
-
-        gameMode = 0;
     }
 }

@@ -13,11 +13,14 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 {
     public static LevelManager instance;
 
+    [SerializeField] TextMeshProUGUI m_gameInfo;
+
     [Range(0.1f, 0.2f)][SerializeField] float m_traitorPercentage;
 
     [SerializeField] int m_traitorsLeft;
     [SerializeField] int m_innocentsLeft;
 
+    [SerializeField] GameObject m_victoryPanel;
     [SerializeField] TextMeshProUGUI m_Winnerstext;
     [SerializeField] GameObject m_exitButton;
 
@@ -45,6 +48,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
         //    print("Soy el master client");
         //}
 
+        m_victoryPanel.SetActive(false);
         m_exitButton.SetActive(false);
         setLevelManagerSate(LevelManagerState.Waiting);
     }
@@ -246,6 +250,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
     [PunRPC]
     void activateExitButton()
     {
+        m_victoryPanel.SetActive(true);
         m_exitButton.SetActive(true);
         Cursor.visible = true;
     }
@@ -309,6 +314,7 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
     [PunRPC]
     void WinnersInfo(string p_winners, Color p_winnersColor)
     {
+        m_gameInfo.text = "";
         m_Winnerstext.text = p_winners;
         m_Winnerstext.color = p_winnersColor;
     }
@@ -336,6 +342,17 @@ public class LevelManager : MonoBehaviourPunCallbacks, IOnEventCallback
 
             GetNewGameplayRole();
         }*/
+    }
+
+    public void getNewInfoGame(string p_playerInfo)
+    {
+        m_photonView.RPC("showNewGameInfo", RpcTarget.All, p_playerInfo);
+    }
+
+    [PunRPC]
+    void showNewGameInfo(string p_name)
+    {
+        m_gameInfo.text = "El jugador: " + p_name + " ha quedado eliminado";
     }
 }
 public enum LevelManagerState

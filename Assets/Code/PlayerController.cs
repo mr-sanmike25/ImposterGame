@@ -69,6 +69,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         m_boxCollider.enabled = false;
         m_triggerCollision.SetActive(true);
         m_particleSystem.gameObject.SetActive(false);
+        m_currentRoleText.text = "Role...";
     }
 
     private void Update()
@@ -320,6 +321,7 @@ public class PlayerController : MonoBehaviourPunCallbacks, IOnEventCallback {
         m_particleSystem.Play();
         yield return new WaitForSeconds(m_particleSystem.main.duration);
         deathEvent(m_currentRoleName);
+        LevelManager.instance.getNewInfoGame(gameObject.name);
         PhotonNetwork.Destroy(gameObject);
     }
 
