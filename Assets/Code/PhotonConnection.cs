@@ -5,7 +5,6 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
 using TMPro;
-using WebSocketSharp;
 
 public class PhotonConnection : MonoBehaviourPunCallbacks
 {
@@ -124,7 +123,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
 
     public void JoinOrCreateVSDefaultRoom()
     {
-        if (m_newNickname.text.IsNullOrEmpty())
+        if (m_newNickname.text == "")
         {
             m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
             m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
@@ -179,7 +178,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
 
     public void JoinOrCreateCoopDefaultRoom()
     {
-        if (m_newNickname.text.IsNullOrEmpty())
+        if (m_newNickname.text == "")
         {
             m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(true);
             m_nicknameFailedTextMeshProUGUI.text = "Introduce un nombre, no lo dejes en blanco.";
@@ -206,7 +205,7 @@ public class PhotonConnection : MonoBehaviourPunCallbacks
 
     public void PlayButton()
     {
-        if(!m_newNickname.text.IsNullOrEmpty())
+        if(m_newNickname.text != "")
         {
             m_nicknameFailedTextMeshProUGUI.gameObject.SetActive(false);
 
